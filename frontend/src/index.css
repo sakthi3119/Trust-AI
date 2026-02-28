@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Bauhaus Design System ─────────────────────────────────────── */
+:root {
+    --bg: #F0F0F0;
+    --fg: #121212;
+    --red: #D02020;
+    --blue: #1040C0;
+    --yellow: #F0C020;
+    --muted: #E0E0E0;
+    --border: #121212;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg);
+    color: var(--fg);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--fg);
+}
+
+@layer components {
+
+    /* ── Cards ── */
+    .card {
+        @apply bg-white border-4 border-black p-5;
+        box-shadow: 8px 8px 0px 0px #121212;
+    }
+
+    .card-sm {
+        @apply bg-white border-2 border-black p-4;
+        box-shadow: 4px 4px 0px 0px #121212;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+        @apply bg-[#D02020] text-white font-bold uppercase tracking-wider border-2 border-black px-5 py-2.5 transition-all duration-200 cursor-pointer hover:bg-[#B01818] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-40 disabled:cursor-not-allowed;
+        box-shadow: 4px 4px 0px 0px #121212;
+    }
+
+    .btn-primary:not(:disabled):active {
+        box-shadow: none;
+    }
+
+    .btn-blue {
+        @apply bg-[#1040C0] text-white font-bold uppercase tracking-wider border-2 border-black px-5 py-2.5 transition-all duration-200 cursor-pointer hover:bg-[#0D35A0] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-40 disabled:cursor-not-allowed;
+        box-shadow: 4px 4px 0px 0px #121212;
+    }
+
+    .btn-blue:not(:disabled):active {
+        box-shadow: none;
+    }
+
+    .btn-yellow {
+        @apply bg-[#F0C020] text-black font-bold uppercase tracking-wider border-2 border-black px-5 py-2.5 transition-all duration-200 cursor-pointer hover:bg-[#D4AA1A] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-40 disabled:cursor-not-allowed;
+        box-shadow: 4px 4px 0px 0px #121212;
+    }
+
+    .btn-yellow:not(:disabled):active {
+        box-shadow: none;
+    }
+
+    .btn-outline {
+        @apply bg-white text-black font-bold uppercase tracking-wider border-2 border-black px-5 py-2.5 transition-all duration-200 cursor-pointer hover:bg-[#E0E0E0] active:translate-x-[2px] active:translate-y-[2px];
+        box-shadow: 4px 4px 0px 0px #121212;
+    }
+
+    .btn-outline:active {
+        box-shadow: none;
+    }
+
+    /* ── Inputs ── */
+    .input {
+        @apply bg-white border-2 border-black px-4 py-2.5 text-black placeholder-[#888] font-medium focus:outline-none transition-all;
+        box-shadow: inset 0 0 0 0 transparent;
+    }
+
+    .input:focus {
+        border-color: #1040C0;
+        box-shadow: 3px 3px 0px 0px #1040C0;
+    }
+
+    /* ── Tags ── */
+    .tag {
+        @apply inline-flex items-center px-2.5 py-0.5 border-2 border-black text-xs font-bold uppercase tracking-wider;
+    }
+}

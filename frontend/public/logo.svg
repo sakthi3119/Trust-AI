@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <!-- Black plate -->
+  <rect width="40" height="40" fill="#121212"/>
+  <!-- Red circle — top-left -->
+  <circle cx="12" cy="13" r="9" fill="#D02020"/>
+  <!-- Blue square — top-right -->
+  <rect x="22" y="5" width="13" height="13" fill="#1040C0"/>
+  <!-- Yellow triangle — bottom -->
+  <polygon points="5,35 35,35 20,18" fill="#F0C020"/>
+</svg>

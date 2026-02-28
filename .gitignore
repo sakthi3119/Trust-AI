@@ -1,0 +1,90 @@
+# ── Python / Backend ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables (contains secrets!)
+backend/.env
+.env
+.env.*
+!.env.example
+
+# SQLite database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs & server output
+*.log
+uvicorn_out.txt
+uvicorn_err.txt
+server.log
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# mypy / ruff / pyright caches
+.mypy_cache/
+.ruff_cache/
+.pyright/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+
+# Vite build output
+frontend/dist/
+dist/
+
+# Local env overrides
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# ── OS & Editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── Docker build artefacts ────────────────────────────────────────────────────
+.dockerignore
+
+# ── Large media (keep out of git) ─────────────────────────────────────────────
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# ── FAISS / ML model artefacts ────────────────────────────────────────────────
+*.faiss
+*.index
+data/faiss_index/
+data/*.npy
+
+# ── Misc ─────────────────────────────────────────────────────────────────────
+*.bak
+*.swp
+*.tmp
