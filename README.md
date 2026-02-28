@@ -1,237 +1,198 @@
-# TRUSTAI – Explainable AI Assistant for Smart Campus Life
+# TrustAI – Smart Campus Life Assistant
 
-> Hackathon Prototype | React + FastAPI + PostgreSQL + FAISS + Ollama
+This is our hackathon project. It's an AI-powered assistant built specifically for college students that helps with budgeting, activity recommendations, day planning, and club content generation – all running locally with no paid APIs.
+
+The idea came from a pretty common problem: students don't really know how to manage their time and money on campus. Most existing apps are either too generic or just show ads. We wanted something that actually understands a student's context – their budget, free time, preferences, and campus location – and gives useful suggestions with proper reasoning behind it.
 
 ---
 
-## Folder Structure
+## What it does
+
+**Chat interface** – Talk to the AI like you'd chat with a friend. Ask things like "I have ₹150 and 2 hours free, what should I do?" and it gives a proper answer based on your profile.
+
+**Budget Guardian** – Tracks your daily and monthly spending. Before suggesting anything, it checks if you can actually afford it. Shows warnings when you're close to your limit.
+
+**Smart Recommendations** – Doesn't just show random stuff. Each recommendation is scored based on 5 things: how affordable it is, how much it matches your interests, whether you have time for it, how close it is on campus, and a diversity score so it doesn't keep recommending the same category over and over.
+
+**Day Planner** – Generates a full plan for your free window (food → activity → event) that fits within your remaining budget and time.
+
+**Content Generator** – Useful for club secretaries. Give it your event details and it generates an Instagram caption, WhatsApp announcement, and poster text. Saves a lot of time honestly.
+
+**Explanation Layer** – Every recommendation shows a score breakdown and a radar chart so you can see *why* it was suggested. The LLM also writes a short natural language explanation for each one.
+
+---
+
+## Tech stack
+
+- Frontend: React 18 + Vite + Tailwind CSS
+- Backend: FastAPI + SQLAlchemy + Pydantic
+- Database: SQLite (switched from PostgreSQL to keep setup simple)
+- Vector search: FAISS + sentence-transformers (all-MiniLM-L6-v2)
+- LLM: Ollama – running llama3.2 locally (no API key, no cost)
+- Auth: JWT tokens with bcrypt
+
+---
+
+## How to run it locally
+
+You need Python 3.11+, Node.js 20+, and Ollama installed first.
+
+### 1. Get Ollama running
+
+```bash
+ollama pull llama3.2
+ollama serve
+```
+
+llama3.2 is about 2GB. If you want better responses and have RAM to spare, you can use mistral instead – just change `OLLAMA_MODEL=mistral` in the `.env` file.
+
+### 2. Backend
+
+```bash
+cd backend
+
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Mac/Linux
+
+pip install -r requirements.txt
+
+# this seeds the database and builds the FAISS index
+python data/seed_data.py
+
+uvicorn main:app --reload --port 8000
+```
+
+Swagger docs will be at http://localhost:8000/docs if you want to test the APIs directly.
+
+### 3. Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173
+
+That's it. Register an account, go through the onboarding (it asks about your preferences, budget, campus areas), and start using it.
+
+---
+
+## Project structure
 
 ```
 AMD/
 ├── backend/
-│   ├── main.py                    # FastAPI app entry
-│   ├── config.py                  # Settings (env vars)
-│   ├── database.py                # SQLAlchemy engine + session
-│   ├── models.py                  # DB models
-│   ├── schemas.py                 # Pydantic schemas
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── .env                       # Environment variables
+│   ├── main.py              # app entry, auto-migration runs here
+│   ├── models.py            # all SQLAlchemy models
+│   ├── schemas.py           # Pydantic request/response schemas
 │   ├── routers/
-│   │   ├── chat.py                # /api/chat
-│   │   ├── budget.py              # /api/budget
-│   │   ├── recommendations.py     # /api/recommendations
-│   │   ├── planner.py             # /api/planner
-│   │   └── content.py             # /api/content
+│   │   ├── auth.py          # register, login
+│   │   ├── chat.py          # chat + session management
+│   │   ├── budget.py        # transactions, budget check
+│   │   ├── recommendations.py
+│   │   ├── planner.py
+│   │   └── content.py
 │   ├── services/
-│   │   ├── llm_service.py         # Ollama integration
-│   │   ├── faiss_service.py       # FAISS vector search
-│   │   ├── budget_service.py      # Budget Guardian logic
-│   │   ├── optimization_service.py# Multi-constraint scoring
-│   │   └── diversity_service.py   # Anti-filter bubble
+│   │   ├── llm_service.py        # Ollama calls
+│   │   ├── faiss_service.py      # vector similarity search
+│   │   ├── budget_service.py     # budget guardian logic
+│   │   ├── optimization_service.py  # 5-criteria scoring
+│   │   └── diversity_service.py  # anti-filter bubble
 │   └── data/
-│       └── seed_data.py           # 20 dummy recommendations + transactions
+│       └── seed_data.py     # sample activities + transactions
 ├── frontend/
-│   ├── src/
-│   │   ├── api/client.js          # Axios API wrapper
-│   │   ├── components/
-│   │   │   ├── Layout.jsx         # Sidebar nav layout
-│   │   │   ├── ChatInterface.jsx  # Conversational UI
-│   │   │   ├── BudgetDashboard.jsx
-│   │   │   ├── RecommendationCard.jsx
-│   │   │   ├── ExplanationModal.jsx  # Score radar + breakdown
-│   │   │   ├── DayPlanner.jsx
-│   │   │   └── ContentGenerator.jsx
-│   │   └── pages/
-│   │       ├── Home.jsx           # Chat
-│   │       ├── Budget.jsx
-│   │       ├── Recommendations.jsx
-│   │       ├── Planner.jsx
-│   │       └── ContentGen.jsx
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   └── package.json
+│   └── src/
+│       ├── api/client.js         # Axios wrapper
+│       ├── components/
+│       │   ├── Layout.jsx        # sidebar + navigation
+│       │   ├── ChatInterface.jsx # chat UI with session history
+│       │   ├── TrustAILogo.jsx   # brand logo component
+│       │   └── ...
+│       ├── pages/
+│       │   ├── Home.jsx
+│       │   ├── Budget.jsx
+│       │   ├── Recommendations.jsx
+│       │   ├── Planner.jsx
+│       │   ├── ContentGen.jsx
+│       │   └── Profile.jsx
+│       └── context/
+│           └── AuthContext.jsx   # global auth state
 └── docker-compose.yml
 ```
 
 ---
 
-## Quick Start (Local – Recommended for Hackathon)
+## API endpoints (quick reference)
 
-### Prerequisites
+```
+POST   /api/auth/register
+POST   /api/auth/login
 
-| Tool | Version | Install |
-|------|---------|---------|
-| Python | 3.11+ | python.org |
-| Node.js | 20+ | nodejs.org |
-| PostgreSQL | 16+ | postgresql.org |
-| Ollama | latest | ollama.ai |
+POST   /api/chat                    send message
+GET    /api/chat/sessions           list chat sessions
+POST   /api/chat/sessions           create session
+PATCH  /api/chat/sessions/:id       rename / pin
+DELETE /api/chat/sessions/:id       delete session
 
----
+GET    /api/budget/status
+POST   /api/budget/transaction
+GET    /api/budget/check?amount=X
 
-### Step 1 – Start Ollama
+POST   /api/recommendations
+GET    /api/recommendations/all
 
-```bash
-# Pull a model (llama3.2 is small and fast)
-ollama pull llama3.2
+POST   /api/planner/generate
+GET    /api/planner/history
 
-# Start Ollama server (usually runs automatically)
-ollama serve
+POST   /api/content/generate
+
+GET    /api/profile
+PUT    /api/profile
+POST   /api/profile/avatar
 ```
 
 ---
 
-### Step 2 – Set up PostgreSQL
+## How the scoring works
 
-```bash
-# Create DB and user (run in psql)
-CREATE USER trustai WITH PASSWORD 'trustai123';
-CREATE DATABASE trustai_db OWNER trustai;
-GRANT ALL PRIVILEGES ON DATABASE trustai_db TO trustai;
-```
+Every recommendation gets a score out of 1.0 based on:
 
----
-
-### Step 3 – Backend Setup
-
-```bash
-cd backend
-
-# Create virtual environment
-python -m venv venv
-venv\Scripts\activate          # Windows
-# source venv/bin/activate     # Mac/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Seed the database + build FAISS index
-python data/seed_data.py
-
-# Start the API server
-uvicorn main:app --reload --port 8000
-```
-
-API docs → http://localhost:8000/docs
+- **Budget fit (30%)** – how well the cost fits your remaining budget. Not just "can you afford it" but also avoids suggesting things that use up too much at once.
+- **Preference match (25%)** – Jaccard similarity between the item's tags and your stated interests from onboarding.
+- **Time feasibility (20%)** – checks if the activity duration fits in your free window and if it matches your preferred time of day.
+- **Proximity (15%)** – based on which campus areas you frequent. Items in your regular spots score higher.
+- **Diversity (10%)** – we track your last 10 recommendations. If a category is showing up more than 50% of the time, new items from that category get penalised. This is the anti-filter-bubble part.
 
 ---
 
-### Step 4 – Frontend Setup
+## Common issues
 
-```bash
-cd frontend
+**"Could not reach Ollama"** – Just run `ollama serve` in a terminal. Sometimes it stops after a while.
 
-npm install
-npm run dev
-```
+**FAISS index is empty / no recommendations showing** – Run `python data/seed_data.py` again. This rebuilds both the database seed data and the FAISS index.
 
-Open → http://localhost:5173
+**Frontend showing blank / API errors** – Make sure the backend is running on port 8000. Check that there's no CORS issue (backend allows localhost:5173 by default).
 
----
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /api/chat | Send message, get AI reply |
-| GET | /api/chat/history | Fetch chat history |
-| GET | /api/budget/status | Get budget overview |
-| POST | /api/budget/transaction | Add a transaction |
-| GET | /api/budget/check?amount=X | Pre-flight budget check |
-| PUT | /api/budget/settings | Update daily/monthly budget |
-| POST | /api/recommendations | Get ranked recommendations |
-| GET | /api/recommendations/all | List all items |
-| POST | /api/planner/generate | Generate a day plan |
-| GET | /api/planner/history | Saved plans |
-| POST | /api/content/generate | Generate club content |
+**Avatar not showing after upload** – Clear browser localStorage once. There was an old cached user object without the avatar field, logging out and back in fixes it.
 
 ---
 
-## Core Features Explained
-
-### Budget Guardian
-- Stores daily transactions in PostgreSQL
-- `is_within_budget()` checks remaining balance before suggesting items
-- Warning banners at 85% daily spend and 90% monthly spend
-
-### Multi-Constraint Optimization Engine
-Scores every recommendation with weighted criteria:
-
-| Criterion | Weight | How it's computed |
-|-----------|--------|-------------------|
-| Budget Fit | 30% | Cost/budget ratio sweet-spot curve |
-| Preference Match | 25% | Jaccard overlap: item tags ∩ user prefs |
-| Time Feasibility | 20% | Duration vs free window + time-of-day fit |
-| Proximity | 15% | Campus location distance graph |
-| Diversity Score | 10% | Injected by Anti-Filter Bubble service |
-
-### Anti-Filter Bubble
-- Tracks the last 10 sub-categories recommended
-- If any category > 50% of recent history → marked repetitive
-- Diversity score penalises over-recommended categories
-- `ensure_category_diversity()` guarantees ≥2 distinct categories in results
-
-### Explanation Layer
-For every recommendation, the UI provides:
-- **Contribution percentages** (score breakdown bars)
-- **Radar chart** of all five scoring dimensions
-- **Natural language explanation** generated by the local LLM
-- **Why alternatives were rejected** (passed to LLM prompt)
-
-### Mini Day Planner
-- Greedy algorithm: picks the best food → activity → event
-- Respects remaining budget and time window
-- Adds 15-min buffer between activities
-- Generates LLM summary of the whole plan
-
-### Club Content Generator
-- Sends event details to Ollama
-- Returns Instagram caption (with hashtags), WhatsApp announcement, and poster text
-- One-click copy for each output
-
----
-
-## Docker Compose (Alternative)
+## Running with Docker (alternative)
 
 ```bash
 docker compose up --build
 ```
 
-> Note: Ollama must run on the host machine; the backend reaches it via `host.docker.internal:11434`.
+Note: Ollama needs to run on your host machine. The backend talks to it via `host.docker.internal:11434`.
 
 ---
 
-## Changing the LLM Model
+## Team HackRats
 
-Edit `backend/.env`:
+**Sivavashini S** – III CSBS  
+**Angupranisa U** – III CSBS  
+**Sakthivel M** – III AIDS  
 
-```env
-OLLAMA_MODEL=llama3.2       # default (fast, ~2GB)
-# OLLAMA_MODEL=mistral      # better quality, ~4GB
-# OLLAMA_MODEL=gemma2:2b    # very fast, ~1.4GB
-```
-
-Then restart the backend.
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| `[LLM Error] Could not reach Ollama` | Run `ollama serve` in a terminal |
-| `FAISS index empty` | Run `python data/seed_data.py` |
-| `connection refused` on PostgreSQL | Check DB is running, credentials match `.env` |
-| Frontend shows no data | Verify backend is on port 8000 and CORS allows 5173 |
-
----
-
-## Tech Stack Summary
-
-```
-Frontend   React 18 + Vite + Tailwind CSS + Recharts + Framer Motion
-Backend    FastAPI + SQLAlchemy + Pydantic
-Database   PostgreSQL 16
-Vector DB  FAISS (faiss-cpu) + sentence-transformers (all-MiniLM-L6-v2)
-LLM        Ollama (local) – llama3.2 by default
-```
+Sri Eshwar College of Engineering, Coimbatore
